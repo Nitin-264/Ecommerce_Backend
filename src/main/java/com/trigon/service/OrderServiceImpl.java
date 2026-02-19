@@ -13,6 +13,7 @@ import com.trigon.entity.Cart;
 import com.trigon.entity.CartItem;
 import com.trigon.entity.Order;
 import com.trigon.entity.OrderItem;
+import com.trigon.entity.PaymentDetails;
 import com.trigon.entity.User;
 import com.trigon.exception.OrderException;
 import com.trigon.repository.AddressRepository;
@@ -91,6 +92,11 @@ public class OrderServiceImpl implements OrderService{
 		createdOrder.getPaymentDetails().setPaymentStatus("PENDING");
 		createdOrder.setCreatedAt(LocalDateTime.now());
 		
+		// ✅ IMPORTANT FIX
+	    PaymentDetails paymentDetails = new PaymentDetails();
+	    paymentDetails.setPaymentStatus("PENDING");
+	    paymentDetails.setPaymentMethod("NOT_SELECTED");
+	    createdOrder.setPaymentDetails(paymentDetails);
 		Order savedOrder=orderRepo.save(createdOrder);
 		System.out.println("Order that i have saved is :: "+savedOrder);
 		

@@ -2,9 +2,11 @@ package com.trigon.config;
 
 import java.util.Base64;
 import java.util.Date;
+import java.util.stream.Collectors;
 
 import javax.crypto.SecretKey;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Claims;
@@ -26,20 +28,27 @@ public class JwtProvider {
     public String generateToken(Authentication auth) {
         SecretKey key = getSigningKey();
 
+        String authorities = auth.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.joining(","));
         String jwt = Jwts.builder()
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 846_000_000))
                 .claim("email", auth.getName())
+                .claim("authorities", authorities)
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
 
+        System.out.println(jwt);
         return jwt;
     }
 
     public String getMailFromToken(String jwt) {
         try {
         			  
-			jwt = jwt.split(" ")[1].trim();
+        	if (jwt != null && jwt.startsWith("Bearer ")) {
+                jwt = jwt.substring(7);
+            }
 		 
             SecretKey key = getSigningKey();
             Claims claims = Jwts.parserBuilder()

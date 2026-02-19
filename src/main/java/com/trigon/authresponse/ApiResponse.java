@@ -11,4 +11,5 @@ public class ApiResponse {
 
 	String message;
 	boolean status;
+	
 }

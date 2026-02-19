@@ -41,7 +41,7 @@ public class AppConfig {
                         CorsConfiguration cfg = new CorsConfiguration();
                         cfg.setAllowedOriginPatterns(Arrays.asList(
                             "http://localhost:3000",
-                            "https://cartzy-smoky.vercel.app"
+                            "https://ecommerce-frontend-seven-smoky.vercel.app"
                         ));
                         cfg.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                         cfg.setAllowCredentials(true);

@@ -119,49 +119,78 @@ public class ProductServiceImpl implements ProductService{
 	}
 
 	@Override
-	public Page<Product> getAllProduct(String category, List<String> colors, List<String> size, Integer minPrice,
-			Integer maxPrice, Integer minDiscount, String sort, String stock, Integer pageNumber, Integer pageSize) {
+	public Page<Product> getAllProduct(
+	        String category,
+	        List<String> colors,
+	        List<String> size,
+	        Integer minPrice,
+	        Integer maxPrice,
+	        Integer minDiscount,
+	        String sort,
+	        String stock,
+	        Integer pageNumber,
+	        Integer pageSize) {
 
-		Pageable page=PageRequest.of(pageNumber, pageSize);
-//		List<Product> prodList=productRepo.filterProducts(category, minPrice, maxPrice, minDiscount, sort);
-		
-		List<Product> prodList = productRepo.filterProducts(category, minPrice, maxPrice, minDiscount);
+	    // ---------- SAFE DEFAULTS ----------
+	    List<String> safeColors = (colors == null) ? Collections.emptyList() : colors;
+	    List<String> safeSize = (size == null) ? Collections.emptyList() : size;
 
-		if ("price_low".equalsIgnoreCase(sort)) {
-			prodList.sort(Comparator.comparingInt(Product::getDiscountedPrice));
-		} else if ("price_high".equalsIgnoreCase(sort)) {
-			prodList.sort(Comparator.comparingInt(Product::getDiscountedPrice).reversed());
-		}
-		
-		if (!colors.isEmpty()) {
-		    prodList = prodList.stream()
-		        .filter(p -> colors.stream()
-		            .anyMatch(c -> c.equalsIgnoreCase(p.getColor())))
-		        .collect(Collectors.toList());
-		}
+	    int safePageNumber = (pageNumber == null) ? 0 : pageNumber;
+	    int safePageSize = (pageSize == null) ? 8 : pageSize;
 
-		
-		if(stock!=null) {
-			if(stock.equals("in_the_stock")) {
-				prodList=prodList.stream().filter(p->p.getQuantity()>0).collect(Collectors.toList());
-			}else if(stock.equals("out_of_stock")) {
-				prodList=prodList.stream().filter(p->p.getQuantity()<1).collect(Collectors.toList());
-			}
-		}
-		
-		
-		int startIndex = (int) page.getOffset();
-		int lastIndex = Math.min(startIndex + page.getPageSize(), prodList.size());
+	    Pageable page = PageRequest.of(safePageNumber, safePageSize);
 
-		if (startIndex > lastIndex || startIndex >= prodList.size()) {
-		    return new PageImpl<>(Collections.emptyList(), page, prodList.size());
-		}
+	    // ---------- FETCH PRODUCTS ----------
+	    List<Product> prodList =
+	            productRepo.filterProducts(category, minPrice, maxPrice, minDiscount);
 
-		List<Product> pageContent = prodList.subList(startIndex, lastIndex);
-		return new PageImpl<>(pageContent, page, prodList.size());
+	    if (prodList == null) {
+	        prodList = Collections.emptyList();
+	    }
 
-		
+	    // ---------- SORT ----------
+	    if ("price_low".equalsIgnoreCase(sort)) {
+	        prodList.sort(Comparator.comparingInt(Product::getDiscountedPrice));
+	    } else if ("price_high".equalsIgnoreCase(sort)) {
+	        prodList.sort(
+	                Comparator.comparingInt(Product::getDiscountedPrice).reversed()
+	        );
+	    }
+
+	    // ---------- FILTER BY COLOR ----------
+	    if (!safeColors.isEmpty()) {
+	        prodList = prodList.stream()
+	                .filter(p -> safeColors.stream()
+	                        .anyMatch(c -> c.equalsIgnoreCase(p.getColor())))
+	                .collect(Collectors.toList());
+	    }
+
+	    // ---------- FILTER BY STOCK ----------
+	    if ("in_the_stock".equals(stock)) {
+	        prodList = prodList.stream()
+	                .filter(p -> p.getQuantity() > 0)
+	                .collect(Collectors.toList());
+	    } else if ("out_of_stock".equals(stock)) {
+	        prodList = prodList.stream()
+	                .filter(p -> p.getQuantity() < 1)
+	                .collect(Collectors.toList());
+	    }
+
+	    // ---------- PAGINATION ----------
+	    int startIndex = (int) page.getOffset();
+
+	    if (startIndex >= prodList.size()) {
+	        return new PageImpl<>(Collections.emptyList(), page, prodList.size());
+	    }
+
+	    int lastIndex = Math.min(startIndex + page.getPageSize(), prodList.size());
+
+	    List<Product> pageContent = prodList.subList(startIndex, lastIndex);
+
+	    return new PageImpl<>(pageContent, page, prodList.size());
 	}
+
+
 
 	@Override
 	public List<Product> findAllProducts() {

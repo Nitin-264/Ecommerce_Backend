@@ -79,7 +79,10 @@ public class PaymentController {
 			paymentLinkRequest.put("callback_method","get");
 
 			System.out.println("Request => " + paymentLinkRequest.toString());
-			
+			System.out.println("KEY LENGTH = " + apiKey.length());
+            System.out.println("SECRET LENGTH = " + secretKey.length());
+            System.out.println("KEY = [" + apiKey + "]");
+            System.out.println("SECRET = [" + secretKey + "]");
 			PaymentLink payment=razorpay.paymentLink.create(paymentLinkRequest);
 			String paymentLinkId=payment.get("id");
 			String paymentLinkUrl=payment.get("short_url");
@@ -89,6 +92,8 @@ public class PaymentController {
 			System.out.println("Responsse is :: "+response);
 			return new ResponseEntity<PaymentLinkResponse>(response,HttpStatus.CREATED);
 		}catch(Exception e) {
+			 e.printStackTrace();
+             System.out.println("REAL ERROR => " + e.getMessage());
 			throw new RazorpayException("Error creating payment link", e);
 		}
 		

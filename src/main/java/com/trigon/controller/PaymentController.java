@@ -77,6 +77,8 @@ public class PaymentController {
 			
 			paymentLinkRequest.put("callback_url","https://ecommerce-frontend-seven-smoky.vercel.app/payment/"+order.getId());
 			paymentLinkRequest.put("callback_method","get");
+
+			System.out.println("Request => " + paymentLinkRequest.toString());
 			
 			PaymentLink payment=razorpay.paymentLink.create(paymentLinkRequest);
 			String paymentLinkId=payment.get("id");

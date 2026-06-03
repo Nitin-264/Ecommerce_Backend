@@ -58,8 +58,9 @@ public class PaymentController {
 		System.out.println("Secret key is :: "+secretKey);
 		
 		try {
-			RazorpayClient razorpay=new RazorpayClient(apiKey, secretKey);
-			
+			// RazorpayClient razorpay=new RazorpayClient(apiKey, secretKey);
+			RazorpayClient razorpay =
+        new RazorpayClient(apiKey.trim(), secretKey.trim());
 			JSONObject paymentLinkRequest=new JSONObject();
 			
 			paymentLinkRequest.put("amount",order.getTotalDiscountedPrice()*100);
